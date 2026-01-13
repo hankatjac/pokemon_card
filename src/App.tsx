@@ -6,8 +6,13 @@ import PokemonList from "./component/PokemonList";
 import axios from "axios";
 import Pagination from "./component/Pagination";
 
+type PokemonItem = {
+  name: string;
+  image: string;
+};
+
 const App: React.FC = () => {
-  const [pokemons, setPokemons] = useState<string[]>([]);
+  const [pokemons, setPokemons] = useState<PokemonItem[]>([]);
   const [pokemon, setPokemon] = useState<Pokemon | undefined | null>(undefined);
   const [currentPageUrl, setCurrentPageUrl] = useState(
     "https://pokeapi.co/api/v2/pokemon"
@@ -16,25 +21,51 @@ const App: React.FC = () => {
   const [prevPageUrl, setPrevPageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    //As of 2026, axios.CancelToken is deprecated in favor of the native AbortController. For production apps in 2026, consider using TanStack Query or SWR
-    const controller = new AbortController();
-    setLoading(true);
+  // useEffect(() => {
+  //   //As of 2026, axios.CancelToken is deprecated in favor of the native AbortController. For production apps in 2026, consider using TanStack Query or SWR
+  //   const controller = new AbortController();
+  //   setLoading(true);
 
-    axios
-      .get(currentPageUrl, { signal: controller.signal })
-      .then((res) => {
-        setLoading(false);
-        setNextPageUrl(res.data.next);
-        setPrevPageUrl(res.data.previous);
-        setPokemons(res.data.results.map((p: { name: any }) => p.name));
+  //   axios
+  //     .get(currentPageUrl, { signal: controller.signal })
+  //     .then((res) => {
+  //       setLoading(false);
+  //       setNextPageUrl(res.data.next);
+  //       setPrevPageUrl(res.data.previous);
+  //       setPokemons(res.data.results.map((p: { name: any }) => p.name));
+  //     })
+  //     .catch((err) => {
+  //       if (axios.isCancel(err)) return; // Ignore error if it was a manual cancel
+  //       console.error(err);
+  //     });
+
+  //   return () => controller.abort();
+  // }, [currentPageUrl]);
+
+  const loadPokemons = async (url: string) => {
+    const res = await axios(url);
+    const data = await res.data;
+
+    const detailed = await Promise.all(
+      data.results.map(async (p: { name: string; url: string }) => {
+        const pokeRes = await axios(p.url);
+        const pokeData = await pokeRes.data;
+
+        return {
+          name: p.name,
+          image: pokeData.sprites.other["official-artwork"].front_default,
+        };
       })
-      .catch((err) => {
-        if (axios.isCancel(err)) return; // Ignore error if it was a manual cancel
-        console.error(err);
-      });
+    );
 
-    return () => controller.abort();
+    setPokemons(detailed);
+    setNextPageUrl(data.next);
+    setPrevPageUrl(data.previous);
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    loadPokemons(currentPageUrl).then(() => setLoading(false));
   }, [currentPageUrl]);
 
   const gotoNextPage = () => {
