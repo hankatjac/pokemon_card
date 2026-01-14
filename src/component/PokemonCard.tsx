@@ -37,8 +37,20 @@ const PokemonCard = ({ pokemon }: { pokemon: Pokemon | null }) => {
     white: "from-gray-200 to-gray-400",
   };
 
+  const printCard = (id: number) => {
+    const el = document.getElementById(`pokemon-card-${id}`);
+    if (!el) return;
+    document.body.classList.add('printing');
+    el.classList.add('printing-active');
+    setTimeout(() => {
+      window.print();
+      el.classList.remove('printing-active');
+      document.body.classList.remove('printing');
+    }, 100);
+  };
+
   return (
-    <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200">
+    <div id={`pokemon-card-${pokemon.id}`} className="pokemon-card max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200">
       {/* Header */}
       <div
         className={`p-8 flex justify-center bg-gradient-to-br ${colorMap[color]}`}
@@ -52,6 +64,15 @@ const PokemonCard = ({ pokemon }: { pokemon: Pokemon | null }) => {
 
       {/* Content */}
       <div className="p-6 space-y-6">
+        <div className="flex justify-end">
+          <button
+            onClick={() => printCard(pokemon.id)}
+            className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 no-print"
+            aria-label={`Print ${pokemon.name}`}
+          >
+            Print
+          </button>
+        </div>
         <h1 className="text-3xl font-black text-gray-800 capitalize">
           {pokemon.name}
         </h1>

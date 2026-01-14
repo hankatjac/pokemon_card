@@ -69,4 +69,41 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   } */
-} 
+}
+
+/* Print styles: hide everything except the element we mark as printing-active */
+@page { size: auto; margin: 5mm; }
+@media print {
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  .printing-active, .printing-active * {
+    visibility: visible !important;
+  }
+
+  .printing-active {
+    position: absolute !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+
+    top: 0 !important;
+    margin-top: 5mm !important;
+
+    width: 180mm !important;
+    max-height: 260mm !important; /* prevents second blank page */
+    overflow: hidden !important;
+
+    box-shadow: none !important;
+    border: none !important;
+
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+}

@@ -3,7 +3,7 @@ const Pagination: React.FC<{
   gotoPrevPage: (() => void) | null;
 }> = ({ gotoNextPage, gotoPrevPage }) => {
   return (
-    <div className="flex justify-between">
+    <div className="flex justify-evenly my-4">
       {gotoPrevPage && (
         <button
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"

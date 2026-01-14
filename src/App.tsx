@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { pokeApi, type Pokemon } from "./api/pokeapi";
 import { SearchBar } from "./component/Searchbar";
-import PokemonCard from "./component/PokemaonCard";
+import PokemonCard from "./component/PokemonCard";
 import PokemonList from "./component/PokemonList";
 import axios from "axios";
 import Pagination from "./component/Pagination";
