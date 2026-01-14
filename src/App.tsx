@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { pokeApi, type Pokemon } from "./api/pokeapi";
 import { SearchBar } from "./component/Searchbar";
-import { SearchResult } from "./component/SearchResult";
+import PokemonCard from "./component/PokemaonCard";
 import PokemonList from "./component/PokemonList";
 import axios from "axios";
 import Pagination from "./component/Pagination";
 
-type PokemonItem = {
-  name: string;
-  image: string;
-};
+// type PokemonItem = {
+//   name: string;
+//   image: string;
+// };
 
 const App: React.FC = () => {
-  const [pokemons, setPokemons] = useState<PokemonItem[]>([]);
-  const [pokemon, setPokemon] = useState<Pokemon | undefined | null>(undefined);
+  const [pokemons, setPokemons] = useState<Pokemon[]>([]);
+  const [pokemon, setPokemon] = useState<Pokemon | null>(null);
   const [currentPageUrl, setCurrentPageUrl] = useState(
     "https://pokeapi.co/api/v2/pokemon"
   );
@@ -51,10 +51,7 @@ const App: React.FC = () => {
         const pokeRes = await axios(p.url);
         const pokeData = await pokeRes.data;
 
-        return {
-          name: p.name,
-          image: pokeData.sprites.other["official-artwork"].front_default,
-        };
+        return pokeData;
       })
     );
 
@@ -81,7 +78,8 @@ const App: React.FC = () => {
   const searchForPokemon = async (pokemonName: string) => {
     try {
       const response = await pokeApi.getPokemon(pokemonName);
-      setPokemon(response.data);
+      const pokemonData = response.data;
+      setPokemon(pokemonData);
     } catch {
       setPokemon(null);
     }
@@ -93,7 +91,11 @@ const App: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* LEFT PANEL */}
         <div className="flex flex-col gap-4">
-          <PokemonList pokemons={pokemons} />
+          <PokemonList
+            pokemons={pokemons}
+            pokemon={pokemon}
+            setPokemon={setPokemon}
+          />
           <Pagination
             gotoNextPage={nextPageUrl ? gotoNextPage : null}
             gotoPrevPage={prevPageUrl ? gotoPrevPage : null}
@@ -103,7 +105,7 @@ const App: React.FC = () => {
         {/* RIGHT PANEL */}
         <div className="flex flex-col gap-4">
           <SearchBar onSearch={searchForPokemon} />
-          <SearchResult pokemon={pokemon} />
+          <PokemonCard pokemon={pokemon} />
         </div>
       </div>
     </div>

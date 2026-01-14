@@ -70,6 +70,7 @@ export interface VersionGroupDetail {
 }
 
 export interface Sprites {
+    other: any;
     back_default:       string;
     back_female:        null;
     back_shiny:         string;
