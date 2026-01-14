@@ -71,39 +71,93 @@ button:focus-visible {
   } */
 }
 
-/* Print styles: hide everything except the element we mark as printing-active */
-@page { size: auto; margin: 5mm; }
+/* ----------------------------- */
+/* Pokédex Border (Print-Safe)   */
+/* ----------------------------- */
+.pokedex-border {
+  border: 6px solid #d62828;
+  border-radius: 20px;
+  padding: 8px;
+  background: white;
+  box-shadow: inset 0 0 0 4px #f77f00;
+}
+
+/* Ensure colors print correctly */
 @media print {
-  html, body {
+  .pokedex-border {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    box-shadow: inset 0 0 0 4px #f77f00 !important;
+  }
+}
+
+/* ----------------------------- */
+/* Fit-to-Page Scaling Wrapper   */
+/* ----------------------------- */
+.fit-to-page {
+  /* No effect in screen mode — only active in print */
+}
+
+/* ----------------------------- */
+/* Print Mode Layout Rules       */
+/* ----------------------------- */
+@media print {
+  html,
+  body {
     margin: 0 !important;
     padding: 0 !important;
     height: auto !important;
   }
 
+  /* Hide everything except the active card */
   body * {
     visibility: hidden !important;
   }
 
-  .printing-active, .printing-active * {
+  .printing-active,
+  .printing-active * {
     visibility: visible !important;
   }
 
+  /* Centered, single-page print layout */
   .printing-active {
     position: absolute !important;
     left: 50% !important;
-    transform: translateX(-50%) !important;
-
     top: 0 !important;
+    transform: translateX(-50%) scale(var(--print-scale, 1)) !important;
+    transform-origin: top center !important;
+
+    width: 180mm !important; /* Safe width for Letter */
+    max-height: 260mm !important; /* Prevents blank second page */
     margin-top: 5mm !important;
 
-    width: 180mm !important;
-    max-height: 260mm !important; /* prevents second blank page */
     overflow: hidden !important;
-
-    box-shadow: none !important;
     border: none !important;
+    box-shadow: none !important;
 
     page-break-inside: avoid !important;
     break-inside: avoid !important;
+  }
+
+  /* Optional: shrink padding for print */
+  .printing-active .p-8 {
+    padding: 0.5rem !important;
+  }
+
+  .printing-active .p-6 {
+    padding: 0.25rem !important;
+  }
+
+  /* Ensure images scale safely */
+  .printing-active img {
+    max-width: 35% !important;
+    height: auto !important;
+    display: block !important;
+    margin: 0 auto !important;
+  }
+
+  /* Hide print button */
+  .no-print {
+    display: none !important;
   }
 }

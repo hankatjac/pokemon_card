@@ -6,11 +6,6 @@ import PokemonList from "./component/PokemonList";
 import axios from "axios";
 import Pagination from "./component/Pagination";
 
-// type PokemonItem = {
-//   name: string;
-//   image: string;
-// };
-
 const App: React.FC = () => {
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
   const [pokemon, setPokemon] = useState<Pokemon | null>(null);
@@ -21,26 +16,7 @@ const App: React.FC = () => {
   const [prevPageUrl, setPrevPageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // useEffect(() => {
-  //   //As of 2026, axios.CancelToken is deprecated in favor of the native AbortController. For production apps in 2026, consider using TanStack Query or SWR
-  //   const controller = new AbortController();
-  //   setLoading(true);
-
-  //   axios
-  //     .get(currentPageUrl, { signal: controller.signal })
-  //     .then((res) => {
-  //       setLoading(false);
-  //       setNextPageUrl(res.data.next);
-  //       setPrevPageUrl(res.data.previous);
-  //       setPokemons(res.data.results.map((p: { name: any }) => p.name));
-  //     })
-  //     .catch((err) => {
-  //       if (axios.isCancel(err)) return; // Ignore error if it was a manual cancel
-  //       console.error(err);
-  //     });
-
-  //   return () => controller.abort();
-  // }, [currentPageUrl]);
+  const [fitToPage, setFitToPage] = useState<boolean>(true);
 
   const loadPokemons = async (url: string) => {
     const res = await axios(url);
@@ -49,9 +25,7 @@ const App: React.FC = () => {
     const detailed = await Promise.all(
       data.results.map(async (p: { name: string; url: string }) => {
         const pokeRes = await axios(p.url);
-        const pokeData = await pokeRes.data;
-
-        return pokeData;
+        return pokeRes.data;
       })
     );
 
@@ -66,11 +40,11 @@ const App: React.FC = () => {
   }, [currentPageUrl]);
 
   const gotoNextPage = () => {
-    setCurrentPageUrl(nextPageUrl ?? "");
+    if (nextPageUrl) setCurrentPageUrl(nextPageUrl);
   };
 
   const gotoPrevPage = () => {
-    setCurrentPageUrl(prevPageUrl ?? "");
+    if (prevPageUrl) setCurrentPageUrl(prevPageUrl);
   };
 
   if (loading) return "Loading...";
@@ -78,8 +52,7 @@ const App: React.FC = () => {
   const searchForPokemon = async (pokemonName: string) => {
     try {
       const response = await pokeApi.getPokemon(pokemonName);
-      const pokemonData = response.data;
-      setPokemon(pokemonData);
+      setPokemon(response.data);
     } catch {
       setPokemon(null);
     }
@@ -87,6 +60,18 @@ const App: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4">
+      {/* Fit to Page Toggle */}
+      <div className="mb-4 no-print">
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={fitToPage}
+            onChange={() => setFitToPage(!fitToPage)}
+          />
+          Fit to Page
+        </label>
+      </div>
+
       {/* Two-column layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* LEFT PANEL */}
@@ -105,7 +90,7 @@ const App: React.FC = () => {
         {/* RIGHT PANEL */}
         <div className="flex flex-col gap-4">
           <SearchBar onSearch={searchForPokemon} />
-          <PokemonCard pokemon={pokemon} />
+          <PokemonCard pokemon={pokemon} fitToPage={fitToPage} />
         </div>
       </div>
     </div>

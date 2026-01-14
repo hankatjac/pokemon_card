@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { type Pokemon, pokeApi, type PokemonSpecies } from "../api/pokeapi";
 
-const PokemonCard = ({ pokemon }: { pokemon: Pokemon | null }) => {
+const PokemonCard = ({
+  pokemon,
+  fitToPage,
+}: {
+  pokemon: Pokemon | null;
+  fitToPage: boolean;
+}) => {
   const [species, setSpecies] = useState<PokemonSpecies | undefined>();
 
   useEffect(() => {
@@ -40,116 +46,135 @@ const PokemonCard = ({ pokemon }: { pokemon: Pokemon | null }) => {
   const printCard = (id: number) => {
     const el = document.getElementById(`pokemon-card-${id}`);
     if (!el) return;
-    document.body.classList.add('printing');
-    el.classList.add('printing-active');
+
+    // Measure height BEFORE printing
+    const rect = el.getBoundingClientRect();
+    const maxHeightPx = 260 * 3.78; // 260mm printable height
+
+    let scale = 1;
+    if (rect.height > maxHeightPx) {
+      scale = maxHeightPx / rect.height;
+    }
+
+    // Apply CSS variable
+    el.style.setProperty("--print-scale", scale.toString());
+
+    el.classList.add("printing-active");
     setTimeout(() => {
       window.print();
-      el.classList.remove('printing-active');
-      document.body.classList.remove('printing');
+      el.classList.remove("printing-active");
+      el.style.removeProperty("--print-scale");
     }, 100);
   };
 
   return (
-    <div id={`pokemon-card-${pokemon.id}`} className="pokemon-card max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200">
-      {/* Header */}
-      <div
-        className={`p-8 flex justify-center bg-gradient-to-br ${colorMap[color]}`}
-      >
-        <img
-          src={pokemon.sprites.other["official-artwork"].front_default}
-          alt={pokemon.name}
-          className="w-48 h-48 drop-shadow-2xl transition-transform hover:scale-110"
-        />
-      </div>
-
-      {/* Content */}
-      <div className="p-6 space-y-6">
-        <div className="flex justify-end">
-          <button
-            onClick={() => printCard(pokemon.id)}
-            className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 no-print"
-            aria-label={`Print ${pokemon.name}`}
-          >
-            Print
-          </button>
+    <div
+      id={`pokemon-card-${pokemon.id}`}
+      className={`pokemon-card max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200 ${
+        fitToPage ? "fit-to-page" : ""
+      }`}
+    >
+      <div className="pokedex-border">
+        {/* Header */}
+        <div
+          className={`p-8 flex justify-center bg-gradient-to-br ${colorMap[color]}`}
+        >
+          <img
+            src={pokemon.sprites.other["official-artwork"].front_default}
+            alt={pokemon.name}
+            className="w-48 h-48 drop-shadow-2xl transition-transform hover:scale-110"
+          />
         </div>
-        <h1 className="text-3xl font-black text-gray-800 capitalize">
-          {pokemon.name}
-        </h1>
 
-        {/* Types */}
-        <div className="flex gap-2">
-          {pokemon.types.map((t) => (
-            <span
-              key={t.type.name}
-              className="px-3 py-1 rounded-full text-white text-sm capitalize"
-              style={{
-                backgroundColor: `var(--type-${t.type.name}, #666)`,
-              }}
+        {/* Content */}
+        <div className="p-6 space-y-6">
+          <div className="flex justify-end">
+            <button
+              onClick={() => printCard(pokemon.id)}
+              className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 no-print"
             >
-              {t.type.name}
-            </span>
-          ))}
-        </div>
-
-        {/* Flavor Text */}
-        <p className="text-gray-600 text-sm italic leading-relaxed">
-          "{flavor}"
-        </p>
-
-        {/* Basic Info */}
-        <div className="grid grid-cols-3 text-center gap-4">
-          <div>
-            <p className="text-xs text-gray-500">Height</p>
-            <p className="font-semibold">{pokemon.height / 10} m</p>
+              Print
+            </button>
           </div>
-          <div>
-            <p className="text-xs text-gray-500">Weight</p>
-            <p className="font-semibold">{pokemon.weight / 10} kg</p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500">Base XP</p>
-            <p className="font-semibold">{pokemon.base_experience}</p>
-          </div>
-        </div>
 
-        {/* Abilities */}
-        <div>
-          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
-            Abilities
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {pokemon.abilities.map((ability) => (
+          <h1 className="text-3xl font-black text-gray-800 capitalize">
+            {pokemon.name}
+          </h1>
+
+          {/* Types */}
+          <div className="flex gap-2">
+            {pokemon.types.map((t) => (
               <span
-                key={ability.ability.url}
-                className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-full border border-gray-200 capitalize"
+                key={t.type.name}
+                className="px-3 py-1 rounded-full text-white text-sm capitalize"
+                style={{
+                  backgroundColor: `var(--type-${t.type.name}, #666)`,
+                }}
               >
-                {ability.ability.name}
+                {t.type.name}
               </span>
             ))}
           </div>
-        </div>
 
-        {/* Stats */}
-        <div>
-          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
-            Stats
-          </h2>
-          <div className="space-y-3">
-            {pokemon.stats.map((s) => (
-              <div key={s.stat.name}>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="capitalize">{s.stat.name}</span>
-                  <span>{s.base_stat}</span>
+          {/* Flavor Text */}
+          <p className="text-gray-600 text-sm italic leading-relaxed">
+            "{flavor}"
+          </p>
+
+          {/* Basic Info */}
+          <div className="grid grid-cols-3 text-center gap-4">
+            <div>
+              <p className="text-xs text-gray-500">Height</p>
+              <p className="font-semibold">{pokemon.height / 10} m</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">Weight</p>
+              <p className="font-semibold">{pokemon.weight / 10} kg</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">Base XP</p>
+              <p className="font-semibold">{pokemon.base_experience}</p>
+            </div>
+          </div>
+
+          {/* Abilities */}
+          <div>
+            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+              Abilities
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {pokemon.abilities.map((ability) => (
+                <span
+                  key={ability.ability.url}
+                  className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-full border border-gray-200 capitalize"
+                >
+                  {ability.ability.name}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div>
+            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
+              Stats
+            </h2>
+            <div className="space-y-3">
+              {pokemon.stats.map((s) => (
+                <div key={s.stat.name}>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="capitalize">{s.stat.name}</span>
+                    <span>{s.base_stat}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="h-2 rounded-full bg-indigo-500"
+                      style={{ width: `${(s.base_stat / 150) * 100}%` }}
+                    ></div>
+                  </div>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="h-2 rounded-full bg-indigo-500"
-                    style={{ width: `${(s.base_stat / 150) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
