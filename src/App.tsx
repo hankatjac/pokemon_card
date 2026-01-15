@@ -9,7 +9,7 @@ import Pagination from "./component/Pagination";
 const App: React.FC = () => {
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
   const [pokemon, setPokemon] = useState<Pokemon | null>(null);
-  const [currentPageUrl, setCurrentPageUrl] = useState(
+  const [currentPageUrl, setCurrentPageUrl] = useState<string>(
     "https://pokeapi.co/api/v2/pokemon"
   );
   const [nextPageUrl, setNextPageUrl] = useState<string | null>(null);
@@ -47,7 +47,17 @@ const App: React.FC = () => {
     if (prevPageUrl) setCurrentPageUrl(prevPageUrl);
   };
 
-  if (loading) return "Loading...";
+  if (loading)
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="relative">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600"></div>
+        </div>
+        <p className="mt-4 text-purple-600 font-semibold">
+          Loading Pokémons...
+        </p>
+      </div>
+    );
 
   const searchForPokemon = async (pokemonName: string) => {
     try {
@@ -61,7 +71,8 @@ const App: React.FC = () => {
   return (
     <div className="container mx-auto p-4">
       {/* Fit to Page Toggle */}
-      <div className="mb-4 no-print">
+      <div className="flex justify-evenly mb-4 no-print">
+        <img src="pokemon-23.svg" alt="logo" className="h-10 w-auto pr-5" />
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
@@ -70,6 +81,9 @@ const App: React.FC = () => {
           />
           Fit to Page
         </label>
+        <div>
+          <SearchBar onSearch={searchForPokemon} />
+        </div>
       </div>
 
       {/* Two-column layout */}
@@ -88,10 +102,8 @@ const App: React.FC = () => {
         </div>
 
         {/* RIGHT PANEL */}
-        <div className="flex flex-col gap-4">
-          <SearchBar onSearch={searchForPokemon} />
-          <PokemonCard pokemon={pokemon} fitToPage={fitToPage} />
-        </div>
+
+        <PokemonCard pokemon={pokemon} fitToPage={fitToPage} />
       </div>
     </div>
   );
