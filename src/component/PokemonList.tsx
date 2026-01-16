@@ -6,22 +6,20 @@ const PokemonList: React.FC<{
   setPokemon: React.Dispatch<React.SetStateAction<Pokemon | null>>;
 }> = ({ pokemons, setPokemon }) => {
   return (
-    <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-4 overflow-y-auto md:overflow-y-visible h-[75vh] md:h-auto">
+    <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-4 overflow-y-auto h-[75vh] ">
       {pokemons.map((p) => (
         <div
           key={p.name}
           className="flex flex-col items-center"
           onClick={() => {
             setPokemon(p);
-            window.scrollTo({
-              top: Number.MAX_SAFE_INTEGER,
-              behavior: "smooth",
-            });
-
-            // window.scrollTo({
-            //   top: document.documentElement.scrollHeight,
-            //   behavior: "smooth",
-            // });
+            // Only scroll on mobile screens (below md breakpoint: 768px)
+            if (window.innerWidth < 768) {
+              window.scrollTo({
+                top: document.documentElement.scrollHeight,
+                behavior: "smooth",
+              });
+            }
           }}
         >
           <img
