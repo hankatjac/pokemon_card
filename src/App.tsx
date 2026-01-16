@@ -71,9 +71,14 @@ const App: React.FC = () => {
   return (
     <div className="container mx-auto p-4">
       {/* Fit to Page Toggle */}
-      <div className="flex justify-evenly mb-4 no-print">
-        <img src="pokemon-23.svg" alt="logo" className="h-10 w-auto pr-5" />
-        <label className="flex items-center gap-2 text-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-evenly gap-3 mb-4 no-print">
+        <img
+          src="pokemon-23.svg"
+          alt="logo"
+          className="h-10 w-auto mx-auto sm:mx-0"
+        />
+
+        <label className="flex items-center justify-center gap-2 text-sm">
           <input
             type="checkbox"
             checked={fitToPage}
@@ -81,7 +86,8 @@ const App: React.FC = () => {
           />
           Fit to Page
         </label>
-        <div>
+
+        <div className="w-full sm:w-auto">
           <SearchBar onSearch={searchForPokemon} />
         </div>
       </div>
