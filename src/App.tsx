@@ -126,6 +126,7 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   const [fitToPage, setFitToPage] = useState<boolean>(true);
+  const [searching, setSearching] = useState<boolean>(false);
 
   const loadPokemons = async (url: string) => {
     const res = await axios(url);
@@ -156,24 +157,22 @@ const App: React.FC = () => {
     if (prevPageUrl) setCurrentPageUrl(prevPageUrl);
   };
 
-  if (loading)
-    return (
-      <div className="flex flex-col items-center justify-center py-20">
-        <div className="relative">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600"></div>
-        </div>
-        <p className="mt-4 text-purple-600 font-semibold">
-          Loading Pokémons...
-        </p>
-      </div>
-    );
-
   const searchForPokemon = async (pokemonName: string) => {
+    setSearching(true);
     try {
       const response = await pokeApi.getPokemon(pokemonName);
       setPokemon(response.data);
+      // Only scroll on mobile screens (below md breakpoint: 768px)
+      if (window.innerWidth < 768) {
+        window.scrollTo({
+          top: document.documentElement.scrollHeight,
+          behavior: "smooth",
+        });
+      }
     } catch {
       setPokemon(null);
+    } finally {
+      setSearching(false);
     }
   };
 
@@ -201,6 +200,18 @@ const App: React.FC = () => {
         </div>
       </div>
 
+      {searching ? (
+        <div className="flex items-center justify-center p-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-blue-600"></div>
+        </div>
+      ) : (
+        pokemon === null && (
+          <div className="text-center text-red-500 mb-4 no-print bg-red-100 p-3 rounded border border-red-300 w-full sm:w-1/4 mx-auto">
+            No Pokémon found
+          </div>
+        )
+      )}
+
       {/* Two-column layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* LEFT PANEL */}
@@ -209,6 +220,7 @@ const App: React.FC = () => {
             pokemons={pokemons}
             pokemon={pokemon}
             setPokemon={setPokemon}
+            loading={loading}
           />
           <Pagination
             gotoNextPage={nextPageUrl ? gotoNextPage : null}
@@ -217,7 +229,6 @@ const App: React.FC = () => {
         </div>
 
         {/* RIGHT PANEL */}
-
         <PokemonCard pokemon={pokemon} fitToPage={fitToPage} />
       </div>
     </div>

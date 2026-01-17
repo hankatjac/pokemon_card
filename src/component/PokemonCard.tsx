@@ -21,8 +21,7 @@ const PokemonCard = ({
   }, [pokemon]);
 
   if (pokemon === undefined) return <></>;
-  if (pokemon === null)
-    return <div className="text-center">No Pokémon found</div>;
+  if (pokemon === null) return <></>;
 
   const flavor =
     species?.flavor_text_entries
