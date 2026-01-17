@@ -158,6 +158,7 @@ const App: React.FC = () => {
   };
 
   const searchForPokemon = async (pokemonName: string) => {
+    if (!pokemonName) return;
     setSearching(true);
     try {
       const response = await pokeApi.getPokemon(pokemonName);

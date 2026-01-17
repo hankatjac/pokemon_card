@@ -5,7 +5,7 @@ interface SearchBarProps {
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
-  const [pokemonName, setPokemonName] = useState("pikachu");
+  const [pokemonName, setPokemonName] = useState("");
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPokemonName(e.target.value);
